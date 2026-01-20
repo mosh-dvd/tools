@@ -13,9 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
     <style>
-        /* Styles copied and adapted from subtitle_creator.html */
         :root {
-            --md-sys-color-primary: #006A7A; /* Teal for podcast generator */
+            --md-sys-color-primary: #006A7A;
             --md-sys-color-on-primary: #ffffff;
             --md-sys-color-primary-container: #A1F1FF;
             --md-sys-color-on-primary-container: #002025;
@@ -25,40 +24,316 @@
             --md-sys-color-on-secondary-container: #051F23;
             --md-sys-color-error: #ba1a1a;
             --md-sys-color-background: #f8fcfd;
+            --md-sys-color-on-background: #191c1d;
             --md-sys-color-surface: #f8fcfd;
+            --md-sys-color-on-surface: #191c1d;
             --md-sys-color-surface-variant: #DCE4E6;
+            --md-sys-color-on-surface-variant: #3F484A;
             --md-sys-color-outline: #6F797B;
             --md-sys-color-surface-container-low: #EFF5F6;
-            --border-radius: 16px;
-            --border-radius-small: 8px;
+            --md-sys-color-surface-container: #E9EFF1;
+            --border-radius: 24px;
+            --border-radius-small: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Assistant', sans-serif; background-color: var(--md-sys-color-background); color: var(--md-sys-color-on-background); line-height: 1.6; }
-        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
-        .card { background-color: var(--md-sys-color-surface-container-low); border-radius: var(--border-radius); padding: 2rem; border: 1px solid var(--md-sys-color-surface-variant); box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; }
-        header { padding-bottom: 1rem; text-align: center; }
-        h1, h2, h3 { font-weight: 700; color: var(--md-sys-color-primary); }
-        h1 { font-size: 2.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; }
-        h2 { font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--md-sys-color-primary-container); padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
-        .material-symbols-outlined { font-size: inherit; vertical-align: middle; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 12px 28px; font-family: 'Assistant', sans-serif; font-size: 1.1rem; font-weight: 600; border-radius: 99px; border: none; cursor: pointer; transition: all 0.2s ease-in-out; text-decoration: none; width: auto; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; background-color: var(--md-sys-color-outline); color: var(--md-sys-color-surface); }
-        .btn-primary { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
-        .btn-primary:hover:not(:disabled) { background-color: #004D57; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .btn-secondary { background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); font-size: 1rem; padding: 10px 24px; }
-        .btn-secondary:hover:not(:disabled) { background-color: #B2D2D6; }
-        .input-group { margin-bottom: 1.5rem; }
-        .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--md-sys-color-outline); }
-        .input-field { width: 100%; padding: 12px 16px; border: 1px solid var(--md-sys-color-outline); border-radius: var(--border-radius-small); font-family: 'Assistant', sans-serif; font-size: 1rem; background-color: var(--md-sys-color-surface); }
-        .input-field:focus { outline: 2px solid var(--md-sys-color-primary); }
-        textarea.input-field { resize: vertical; overflow-y: hidden; }
-        #scriptArea { min-height: 250px; overflow-y: auto; }
-        .button-group { text-align: center; margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
-        .status { font-size: 1rem; color: var(--md-sys-color-secondary); text-align: center; margin-top: 1.5rem; min-height: 1.6em; }
-        audio { width: 100%; margin: 1.5rem 0; }
-        #downloadLink { pointer-events: none; opacity: 0.5; }
-        #downloadLink:not([style*="pointer-events: none"]) { pointer-events: auto; opacity: 1; }
+        body { 
+            font-family: 'Assistant', sans-serif; 
+            background-color: var(--md-sys-color-background); 
+            color: var(--md-sys-color-on-background); 
+            line-height: 1.6;
+            transition: background-color 0.3s ease;
+            background-image: radial-gradient(var(--md-sys-color-primary-container) 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            background-attachment: fixed;
+            opacity: 0.98;
+        }
+
+        .container { max-width: 850px; margin: 0 auto; padding: 3rem 1.5rem; }
+        
+        header { margin-bottom: 3rem; text-align: center; }
+        h1 { 
+            font-size: 3rem; 
+            font-weight: 800;
+            color: var(--md-sys-color-primary); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 1rem;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card { 
+            background-color: var(--md-sys-color-surface-container-low); 
+            border-radius: var(--border-radius); 
+            padding: 2.5rem; 
+            border: 1px solid var(--md-sys-color-surface-variant); 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+            margin-bottom: 2.5rem;
+            transition: var(--transition);
+            backdrop-filter: blur(8px);
+        }
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+
+        h2 { 
+            font-size: 1.6rem; 
+            margin-bottom: 2rem; 
+            color: var(--md-sys-color-primary);
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+        }
+        h2 .material-symbols-outlined {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            padding: 8px;
+            border-radius: 12px;
+            font-size: 1.8rem;
+        }
+
+        .input-group { margin-bottom: 2rem; }
+        .input-group label { 
+            display: block; 
+            margin-bottom: 0.75rem; 
+            font-weight: 600; 
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.95rem;
+            padding-right: 4px;
+        }
+        .input-field { 
+            width: 100%; 
+            padding: 14px 18px; 
+            border: 2px solid var(--md-sys-color-surface-variant); 
+            border-radius: var(--border-radius-small); 
+            font-family: 'Assistant', sans-serif; 
+            font-size: 1.05rem; 
+            background-color: var(--md-sys-color-surface-container); 
+            color: var(--md-sys-color-on-surface);
+            transition: var(--transition);
+        }
+        .input-field:focus { 
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-surface);
+            box-shadow: 0 0 0 4px var(--md-sys-color-primary-container);
+        }
+
+        textarea.input-field { resize: vertical; min-height: 50px; }
+        #scriptArea { min-height: 350px; line-height: 1.8; }
+
+        .btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.75rem; 
+            padding: 14px 32px; 
+            font-family: 'Assistant', sans-serif; 
+            font-size: 1.1rem; 
+            font-weight: 700; 
+            border-radius: 100px; 
+            border: none; 
+            cursor: pointer; 
+            transition: var(--transition); 
+            text-decoration: none;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+            filter: grayscale(1);
+        }
+
+        .btn-primary { 
+            background-color: var(--md-sys-color-primary); 
+            color: var(--md-sys-color-on-primary); 
+            box-shadow: 0 4px 12px rgba(0, 106, 122, 0.2);
+        }
+        .btn-primary:hover:not(:disabled) { 
+            background-color: #005a68; 
+            box-shadow: 0 6px 20px rgba(0, 106, 122, 0.3);
+        }
+
+        .btn-secondary { 
+            background-color: var(--md-sys-color-secondary-container); 
+            color: var(--md-sys-color-on-secondary-container); 
+        }
+        .btn-secondary:hover:not(:disabled) { 
+            background-color: var(--md-sys-color-surface-variant); 
+        }
+
+        .button-group { 
+            display: flex; 
+            justify-content: center; 
+            gap: 1.25rem; 
+            flex-wrap: wrap; 
+            margin-top: 1rem;
+        }
+
+        .status { 
+            font-size: 1rem; 
+            color: var(--md-sys-color-secondary); 
+            text-align: center; 
+            margin-top: 2rem; 
+            min-height: 1.6em; 
+            font-weight: 600;
+            padding: 1rem;
+            border-radius: var(--border-radius-small);
+        }
+        .status:not(:empty) {
+            background-color: var(--md-sys-color-secondary-container);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        details {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        summary {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--md-sys-color-primary);
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        summary:hover { background-color: var(--md-sys-color-surface-variant); }
+        details[open] summary { border-bottom: 1px solid var(--md-sys-color-surface-variant); }
+        .details-content { padding: 1.5rem; }
+
+        audio { 
+            width: 100%; 
+            margin: 2rem 0; 
+            height: 54px;
+            border-radius: 27px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .example-box {
+            background: var(--md-sys-color-surface); 
+            padding: 1.25rem; 
+            border-radius: 12px; 
+            font-family: 'Consolas', monospace; 
+            direction: ltr; 
+            text-align: left;
+            border: 1px solid var(--md-sys-color-outline);
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        #downloadLink { transition: var(--transition); }
+        #downloadLink[style*="pointer-events: none"] { opacity: 0.3; filter: grayscale(1); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--md-sys-color-surface-container); }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--md-sys-color-outline); 
+            border-radius: 10px;
+            border: 2px solid var(--md-sys-color-surface-container);
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--md-sys-color-on-surface-variant); }
+    /* New UI Controls */
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .selection-card {
+            background: var(--md-sys-color-surface);
+            border: 2px solid var(--md-sys-color-surface-variant);
+            border-radius: 16px;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--md-sys-color-on-surface-variant);
+            height: 100%;
+            min-height: 100px;
+        }
+        .selection-card:hover {
+            border-color: var(--md-sys-color-primary);
+            background: var(--md-sys-color-surface-container);
+        }
+        .selection-card.selected {
+            background: var(--md-sys-color-primary-container);
+            border-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary-container);
+            font-weight: 700;
+        }
+        .selection-card .material-symbols-outlined {
+            font-size: 32px;
+        }
+        
+        .duration-control {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .square-input {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid var(--md-sys-color-surface-variant);
+            border-radius: 16px;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            -moz-appearance: textfield;
+            font-family: 'Assistant', sans-serif;
+        }
+        .square-input::-webkit-outer-spin-button,
+        .square-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .square-input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 4px var(--md-sys-color-primary-container);
+        }
+        
+        .stepper-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            border: none;
+            background: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .stepper-btn:hover {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        .stepper-btn span { font-size: 24px; }
     </style>
 </head>
 <body>
@@ -78,30 +353,139 @@
             
             <div class="input-group">
                 <label for="topicInput">נושא הפודקאסט</label>
-                <textarea id="topicInput" class="input-field" placeholder="הזינו נושא, נקודות מרכזיות, וסגנון (למשל: בינה מלאכותית ויצירתיות, בסגנון הומוריסטי)" rows="1"></textarea>
+                <textarea id="topicInput" class="input-field" placeholder="הזינו נושא, נקודות מרכזיות, וסגנון (למשל: בינה מלאכותית ויצירתיות, בסגנון הומוריסטי)" rows="3"></textarea>
             </div>
 
             <div class="input-group">
-                <label for="durationInput">אורך רצוי (דקות)</label>
-                <input id="durationInput" type="number" class="input-field" value="7" min="1" max="20" />
+                <label>אורך רצוי (דקות)</label>
+                <div class="duration-container" style="background: var(--md-sys-color-surface-container); padding: 1.5rem; border-radius: 16px; display: flex; align-items: center; gap: 2rem; border: 1px solid var(--md-sys-color-surface-variant); flex-wrap: wrap;">
+                    <!-- Stepper -->
+                    <div class="duration-control">
+                        <button type="button" class="stepper-btn" onclick="updateDurationValue(parseInt(document.getElementById('durationInput').value) - 1)"><span class="material-symbols-outlined">remove</span></button>
+                        <input id="durationInput" type="number" class="square-input" value="7" min="1" max="30" readonly />
+                        <button type="button" class="stepper-btn" onclick="updateDurationValue(parseInt(document.getElementById('durationInput').value) + 1)"><span class="material-symbols-outlined">add</span></button>
+                    </div>
+                    
+                    <!-- Slider & Text -->
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.8rem; min-width: 200px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--md-sys-color-on-surface-variant);">
+                            <span id="durationLabel" style="font-weight: 700; color: var(--md-sys-color-primary); font-size: 1.1rem;">שיחה סטנדרטית</span>
+                            <span>טווח: 1-30 דקות</span>
+                        </div>
+                        <input type="range" id="durationSlider" min="1" max="30" value="7" oninput="updateDurationValue(this.value)" style="width: 100%; height: 6px; border-radius: 3px; accent-color: var(--md-sys-color-primary); cursor: pointer; background: var(--md-sys-color-surface-variant);">
+                    </div>
+                </div>
             </div>
 
             <div class="input-group">
-                <label for="speakersConfig">תצורת דוברים</label>
-                <select id="speakersConfig" class="input-field">
+                <label>תצורת דוברים</label>
+                <div class="selection-grid" id="speakersGrid">
+                    <div class="selection-card selected" onclick="selectSpeakerConfig('male_female', this)">
+                        <span class="material-symbols-outlined" style="font-size: 40px;">wc</span>
+                        <span>גבר ואישה</span>
+                    </div>
+                    <div class="selection-card" onclick="selectSpeakerConfig('two_males', this)">
+                        <div style="display:flex; justify-content: center;">
+                            <span class="material-symbols-outlined" style="font-size: 40px;">man</span>
+                            <span class="material-symbols-outlined" style="font-size: 40px; margin-right: -15px; opacity: 0.7;">man</span>
+                        </div>
+                        <span>שני גברים</span>
+                    </div>
+                    <div class="selection-card" onclick="selectSpeakerConfig('two_females', this)">
+                        <div style="display:flex; justify-content: center;">
+                            <span class="material-symbols-outlined" style="font-size: 40px;">woman</span>
+                            <span class="material-symbols-outlined" style="font-size: 40px; margin-right: -15px; opacity: 0.7;">woman</span>
+                        </div>
+                        <span>שתי נשים</span>
+                    </div>
+                </div>
+                <select id="speakersConfig" style="display:none">
                     <option value="male_female" selected>גבר ואישה</option>
                     <option value="two_males">שני גברים</option>
                     <option value="two_females">שתי נשים</option>
                 </select>
             </div>
+
+            <script>
+                function updateDurationValue(val) {
+                    val = parseInt(val);
+                    if (isNaN(val)) val = 7;
+                    if (val < 1) val = 1;
+                    if (val > 30) val = 30;
+
+                    const input = document.getElementById('durationInput');
+                    const slider = document.getElementById('durationSlider');
+                    const label = document.getElementById('durationLabel');
+
+                    input.value = val;
+                    slider.value = val;
+
+                    // Update context text
+                    let text = "";
+                    if (val <= 3) text = "עדכון בזק / טיקטוק";
+                    else if (val <= 8) text = "שיחה סטנדרטית";
+                    else if (val <= 15) text = "העמקה בנושא";
+                    else text = "פודקאסט מלא ומקיף";
+                    
+                    label.textContent = text;
+
+                    // Trigger input event manually for system prompt listener
+                    input.dispatchEvent(new Event('input'));
+                }
+
+                function selectSpeakerConfig(value, element) {
+                    const select = document.getElementById('speakersConfig');
+                    select.value = value;
+                    
+                    // Update visuals
+                    document.querySelectorAll('.selection-card').forEach(el => el.classList.remove('selected'));
+                    element.classList.add('selected');
+                    
+                    // Trigger change event for listeners
+                    select.dispatchEvent(new Event('change'));
+                }
+
+                function selectModel(value, element) {
+                    const input = document.getElementById('modelSelection');
+                    const customGroup = document.getElementById('customModelGroup');
+                    
+                    input.value = value;
+                    
+                    // Update visuals
+                    // We need to target the siblings in the specific grid
+                    element.parentElement.querySelectorAll('.selection-card').forEach(el => el.classList.remove('selected'));
+                    element.classList.add('selected');
+                    
+                    // Logic
+                    if (value === 'custom') {
+                        customGroup.style.display = 'block';
+                        setTimeout(() => document.getElementById('customModelInput').focus(), 100);
+                    } else {
+                        customGroup.style.display = 'none';
+                    }
+                }
+            </script>
             
             <div class="input-group">
-                <label for="modelSelection">בחר מודל ליצירת התסריט</label>
-                <select id="modelSelection" class="input-field">
-                    <option value="gemini-3-flash-preview" selected>Gemini 3 Flash (מהיר וחסכוני)</option>
-                    <option value="gemini-3-pro-preview">Gemini 3 Pro (מתקדם)</option>
-                    <option value="custom">אחר (הזנה ידנית)</option>
-                </select>
+                <label>בחר מודל ליצירת התסריט</label>
+                <div class="selection-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="selection-card selected" onclick="selectModel('gemini-3-flash-preview', this)">
+                        <span class="material-symbols-outlined">bolt</span>
+                        <span>Gemini 3 Flash</span>
+                        <span style="font-size: 0.8em; opacity: 0.8;">מהיר וחסכוני</span>
+                    </div>
+                    <div class="selection-card" onclick="selectModel('gemini-3-pro-preview', this)">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <span>Gemini 3 Pro</span>
+                        <span style="font-size: 0.8em; opacity: 0.8;">מתקדם</span>
+                    </div>
+                    <div class="selection-card" onclick="selectModel('custom', this)">
+                        <span class="material-symbols-outlined">settings_suggest</span>
+                        <span>אחר</span>
+                        <span style="font-size: 0.8em; opacity: 0.8;">הזנה ידנית</span>
+                    </div>
+                </div>
+                <input type="hidden" id="modelSelection" value="gemini-3-flash-preview">
             </div>
 
             <div class="input-group" id="customModelGroup" style="display: none;">
@@ -247,13 +631,7 @@
             topicInput.style.height = (topicInput.scrollHeight) + 'px';
         });
         
-        modelSelection.addEventListener('change', () => {
-            if (modelSelection.value === 'custom') {
-                customModelGroup.style.display = 'block';
-            } else {
-                customModelGroup.style.display = 'none';
-            }
-        });
+        // Model selection logic moved to selectModel function
 
         // --- API & Core Logic ---
         DataView.prototype.setString = function(offset, str) {
