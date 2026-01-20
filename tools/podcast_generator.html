@@ -98,19 +98,31 @@
             <div class="input-group">
                 <label for="modelSelection">בחר מודל ליצירת התסריט</label>
                 <select id="modelSelection" class="input-field">
-                                        <option value="gemini-3-flash-preview" selected>Gemini 3 Flash (מהיר וחסכוני)</option>
-                                        <option value="gemini-3-pro-preview">Gemini 3 Pro (מתקדם)</option>       
-                                        <option value="custom">אחר (הזנה ידנית)</option>                </select>
+                    <option value="gemini-3-flash-preview" selected>Gemini 3 Flash (מהיר וחסכוני)</option>
+                    <option value="gemini-3-pro-preview">Gemini 3 Pro (מתקדם)</option>
+                    <option value="custom">אחר (הזנה ידנית)</option>
+                </select>
             </div>
 
             <div class="input-group" id="customModelGroup" style="display: none;">
                 <label for="customModelInput">שם המודל המותאם אישית</label>
                 <input id="customModelInput" type="text" class="input-field" placeholder="לדוגמה: gemini-1.5-pro-latest" />
             </div>
+
+            <details style="margin-bottom: 1.5rem; border: 1px solid var(--md-sys-color-outline); border-radius: var(--border-radius-small); padding: 0.5rem;">
+                <summary style="cursor: pointer; font-weight: 600; color: var(--md-sys-color-primary); padding: 0.5rem;">הגדרות מתקדמות: הנחיית מערכת וסגנון (System Prompt)</summary>
+                <div class="input-group" style="margin-top: 1rem;">
+                    <label for="systemInstructionInput" style="font-weight: normal;">כאן ניתן לערוך את ההנחיות המדויקות ל-AI (מוגדר אוטומטית, ניתן לשינוי):</label>
+                    <textarea id="systemInstructionInput" class="input-field" rows="10" style="font-family: monospace; font-size: 0.9rem; overflow-y: auto;"></textarea>
+                </div>
+            </details>
             
             <div class="button-group">
                 <button id="genScriptBtn" class="btn btn-primary">
                     <span class="material-symbols-outlined">edit_note</span> צור תסריט
+                </button>
+                <button id="manualScriptBtn" class="btn btn-secondary">
+                    <span class="material-symbols-outlined">keyboard</span> דלג לעריכה ידנית
                 </button>
             </div>
             <div id="status-script" class="status"></div>
@@ -118,6 +130,27 @@
 
         <div id="script-panel" class="card" style="display: none;">
             <h2><span class="material-symbols-outlined">article</span>שלב 2: עריכת התסריט</h2>
+            
+            <details id="scriptHelp" style="margin-bottom: 1rem; background-color: var(--md-sys-color-surface); padding: 1rem; border-radius: var(--border-radius-small); border: 1px dashed var(--md-sys-color-outline);">
+                <summary style="cursor: pointer; font-weight: 600; color: var(--md-sys-color-primary);">עזרה: מבנה התסריט הרצוי (לחץ לפתיחה)</summary>
+                <div style="margin-top: 0.5rem; font-size: 0.95rem;">
+                    <p>כדי שהשמע יווצר בצורה תקינה, התסריט חייב להיות במבנה הבא:</p>
+                    <ol style="margin-right: 1.5rem; margin-top: 0.5rem;">
+                        <li><strong>שורה ראשונה באנגלית:</strong> הנחיה לטון הדיבור (למשל: "Speaker1 speaks fast, Speaker2 is calm").</li>
+                        <li><strong>גוף השיחה:</strong> דו-שיח בעברית, כאשר שם הדובר באנגלית ואחריו נקודתיים.</li>
+                    </ol>
+                    <p style="margin-top: 1rem; font-weight: 600;">לדוגמה:</p>
+                    <div style="background: #eee; padding: 0.5rem; border-radius: 4px; font-family: monospace; direction: ltr; text-align: left;">
+                        <span id="scriptExamplePrompt">The speakers are discussing technology with excitement.</span><br>
+                        <span id="scriptExampleDialog">
+                        speaker1: שלום לכולם!<br>
+                        speaker2: אהלן, מה העניינים?
+                        </span>
+                    </div>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--md-sys-color-error);">חשוב: השמות (כמו man/girl) הם <strong>מזהים טכניים</strong> התואמים לקולות שנבחרו בהגדרות (שלב 1). אין לשנותם לשמות אחרים (כמו "דני" או "רונית") כי המערכת לא תזהה אותם והשמע לא יעבוד.</p>
+                </div>
+            </details>
+
             <div class="input-group">
                 <label for="scriptArea">תוכן התסריט</label>
                 <textarea id="scriptArea" class="input-field" rows="15"></textarea>
@@ -160,7 +193,9 @@
         const modelSelection = document.getElementById('modelSelection');
         const customModelGroup = document.getElementById('customModelGroup');
         const customModelInput = document.getElementById('customModelInput');
+        const systemInstructionInput = document.getElementById('systemInstructionInput'); // NEW
         const genScriptBtn = document.getElementById('genScriptBtn');
+        const manualScriptBtn = document.getElementById('manualScriptBtn'); // NEW
         const copyScriptBtn = document.getElementById('copyScriptBtn');
         const downloadScriptBtn = document.getElementById('downloadScriptBtn');
         const genAudioBtn = document.getElementById('genAudioBtn');
@@ -171,6 +206,12 @@
         const audioPanel = document.getElementById('audio-panel');
         const statusScript = document.getElementById('status-script');
         const statusAudio = document.getElementById('status-audio');
+        
+        // Help elements
+        const scriptExamplePrompt = document.getElementById('scriptExamplePrompt');
+        const scriptExampleDialog = document.getElementById('scriptExampleDialog');
+
+        let isSystemPromptDirty = false; // Flag to track if user manually edited the prompt
 
         // --- Functions ---
         function updateStatus(message, type = 'script') {
@@ -214,14 +255,49 @@
             }
         });
 
-        // --- API & Core Logic (No changes to API calls structure) ---
+        // --- API & Core Logic ---
         DataView.prototype.setString = function(offset, str) {
             for (let i = 0; i < str.length; i++) {
                 this.setUint8(offset + i, str.charCodeAt(i));
             }
         };
 
+        function getSpeakersInfo(configValue) {
+             switch (configValue) {
+                case 'two_males':
+                    return {
+                        s1: 'speaker1', s2: 'speaker2',
+                        p1: 'He', p2: 'He',
+                        desc1: 'captivating intellectual presence, sharp cynicism',
+                        desc2: 'calm, resonant voice, storyteller',
+                        tags: '`speaker1:`, `speaker2:`',
+                        example: 'speaker1 should be provocative, speaker2 calm.'
+                    };
+                case 'two_females':
+                     return {
+                        s1: 'speaker1', s2: 'speaker2',
+                        p1: 'She', p2: 'She',
+                        desc1: 'quicker, energetic wit, pragmatic',
+                        desc2: 'deliberate, thoughtful, philosophical',
+                        tags: '`speaker1:`, `speaker2:`',
+                        example: 'speaker1 should be energetic, speaker2 thoughtful.'
+                    };
+                case 'male_female':
+                default:
+                     return {
+                        s1: 'man', s2: 'girl',
+                        p1: 'He', p2: 'She',
+                        desc1: 'captivating intellectual presence, analytical, charming',
+                        desc2: 'quicker, energetic wit, pragmatic foil',
+                        tags: '`man:`, `girl:`',
+                        example: 'man should be provocative, girl incisive.'
+                    };
+            }
+        }
+
         function buildSystemPrompt(duration, speakersConfigValue) {
+            const info = getSpeakersInfo(speakersConfigValue);
+
             const baseIntro = `You are an AI specializing in writing podcast scripts. Your task is to create a dialogue that feels like a lively, engaging, and humorous **intellectual sparring match**. The conversation must be dynamic, fast-paced, and above all, thought-provoking.
 
 The desired podcast length is approximately ${duration} minutes.
@@ -233,81 +309,75 @@ The guiding style is one of **sharp and amused cynicism**. The speakers don't ai
 To ensure the content remains within the desired scope, strictly avoid the following topics:
 *   Christianity and its figures or theology.
 *   The theory of evolution.
-*   Discussions involving atheism, agnosticism, or direct challenges to the existence of God.`;
+*   Discussions involving atheism, agnosticism, or direct challenges to the existence of God.
 
-            const outputStructureTemplate = `
+#### **Character Profiles:**
+Their interaction is the heart of the podcast. They complement and challenge each other.
+
+*   **${info.s1}:** ${info.p1} possesses a **${info.desc1}**.
+*   **${info.s2}:** ${info.p2} possesses a **${info.desc2}**.
+
 #### **Exact Output Structure:**
 
 1.  **English Directive:**
     *   The output must begin **directly** with an English directive for a Text-to-Speech (TTS) model.
     *   This directive will describe **only** the required manner of speaking (tone, pace, style). **Do not mention the episode's topic.**
     *   The speaking styles for the speakers must be **different and adapted for each new script.**
-    *   **Crucially:** The directive must be written as a **single, continuous sentence** describing the dynamic between the speakers (e.g., "[EXAMPLE_DIRECTIVE]"). It should **not** be broken down into a list format with separate instructions for each speaker.
+    *   **Crucially:** The directive must be written as a **single, continuous sentence** describing the dynamic between the speakers (e.g., "${info.example}"). It should **not** be broken down into a list format with separate instructions for each speaker.
     *   The directive should state that short vocal cues in parentheses, like (צוחק) or (אנחה), should be incorporated and used **sparingly**.
     *   The cues will be in Hebrew, without Nikkud, and include **only simple, audible actions** (no facial expressions or gestures).
     *   The English directive **must not** end with a colon (:).
 
 2.  **Hebrew Dialogue:**
     *   Immediately following the English directive, the dialogue will appear.
-    *   Speaker names will appear in English: [SPEAKER_TAGS].
+    *   Speaker names will appear in English: ${info.tags}.
     *   **Ensure grammatically correct gender agreement throughout the dialogue** (masculine/feminine forms) to maintain natural and fluent Hebrew.
     *   The entire text will be in **Hebrew, without Nikkud (vocalization).**`;
-          
-            let characterProfiles = '';
-            let speakerTags = '';
-            let exampleDirective = '';
 
-            switch (speakersConfigValue) {
-                case 'two_males':
-                characterProfiles = `
-#### **Character Profiles:**
-Their interaction is the heart of the podcast. They complement and challenge each other.
-
-*   **speaker1:** He possesses a **captivating intellectual presence and a lively, fascinating speaking style**. He uses sharp cynicism and provocative arguments to deconstruct ideas, captivating the listener.
-*   **speaker2:** He is a natural storyteller with a calm, resonant voice. He often grounds the abstract arguments of speaker1 with historical anecdotes, real-world examples, and a touch of philosophical melancholy.`;
-                speakerTags = '`speaker1:`, `speaker2:`';
-                exampleDirective = 'speaker1 should adopt a thoughtfully provocative tone, while speaker2 counters with calm, story-driven insights';
-                break;
-
-                case 'two_females':
-                characterProfiles = `
-#### **Character Profiles:**
-Their interaction is the heart of the podcast. They complement and challenge each other.
-
-*   **speaker1:** She possesses a **quicker, more energetic wit**. She acts as a pragmatic foil, bringing discussions back to the human element with playful irony.
-*   **speaker2:** She has a more deliberate, thoughtful delivery. She enjoys exploring the philosophical and societal implications of the topic, expanding the conversation with 'what if' scenarios and dry humor.`;
-                speakerTags = '`speaker1:`, `speaker2:`';
-                exampleDirective = 'speaker1 should adopt a rapid-fire, incisive style, while speaker2 responds with thoughtful, philosophical expansions';
-                break;
-
-                case 'male_female':
-                default:
-                characterProfiles = `
-#### **Character Profiles:**
-Their interaction is the heart of the podcast. They complement and challenge each other.
-
-*   **man:** He possesses a **captivating intellectual presence and a lively, fascinating speaking style**. His approach is analytical, but he presents it with engaging energy and personal charm. He uses sharp cynicism and provocative arguments to deconstruct ideas.
-*   **girl:** She possesses a **quicker, more energetic wit**. She often acts as a pragmatic foil to his statements, bringing the discussion back down to earth with playful irony.`;
-                speakerTags = '`man:`, `girl:`';
-                exampleDirective = 'man should adopt a thoughtfully provocative tone, while girl counters with rapid-fire, incisive questions';
-                break;
-            }
-
-            const outputStructure = outputStructureTemplate
-                .replace('[SPEAKER_TAGS]', speakerTags)
-                .replace('[EXAMPLE_DIRECTIVE]', exampleDirective);
-
-            return `${baseIntro}\n${characterProfiles}\n${outputStructure}`;
+            return baseIntro;
         }
 
+        function updateSystemPromptUI() {
+            if (isSystemPromptDirty) return;
+            const duration = durationInput.value;
+            const speakersConfigValue = speakersConfig.value;
+            systemInstructionInput.value = buildSystemPrompt(duration, speakersConfigValue);
+        }
+
+        function updateHelpExample() {
+            const info = getSpeakersInfo(speakersConfig.value);
+            scriptExamplePrompt.textContent = info.example;
+            scriptExampleDialog.innerHTML = `${info.s1}: שלום לכולם!<br>${info.s2}: אהלן, מה העניינים?`;
+        }
+
+        // Initial setup
+        updateSystemPromptUI();
+        updateHelpExample();
+
+        // Listeners for auto-updating prompt and help
+        durationInput.addEventListener('input', updateSystemPromptUI);
+        speakersConfig.addEventListener('change', () => {
+            updateSystemPromptUI();
+            updateHelpExample();
+        });
+
+        // Mark prompt as dirty if manually edited
+        systemInstructionInput.addEventListener('input', () => {
+            isSystemPromptDirty = true;
+        });
+
+        manualScriptBtn.addEventListener('click', () => {
+            scriptPanel.style.display = 'block';
+            scriptPanel.scrollIntoView({ behavior: 'smooth' });
+        });
 
         async function generateScript() {
             updateStatus('יוצר תסריט...', 'script');
             genScriptBtn.disabled = true;
 
             const topic = topicInput.value.trim();
-            const duration = durationInput.value;
-            const speakersConfigValue = speakersConfig.value;
+            // We now use the textarea content for the system prompt
+            const systemPrompt = systemInstructionInput.value;
 
             if (!topic) {
                 alert('יש להזין נושא.');
@@ -337,7 +407,6 @@ Their interaction is the heart of the podcast. They complement and challenge eac
                 model = selectedModel;
             }
           
-            const systemPrompt = buildSystemPrompt(duration, speakersConfigValue);
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
             const body = {
                 systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -369,6 +438,7 @@ Their interaction is the heart of the podcast. They complement and challenge eac
                 genScriptBtn.disabled = false;
             }
         }
+
 
         function createWavBlob(pcmData) {
             const numChannels = 1;
