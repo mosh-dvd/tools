@@ -63,8 +63,8 @@ async function fetchAndProcessThread() {
         title = titleElement ? titleElement.textContent.trim() : document.title;
      }
 
-    // זיהוי הנתיב הבסיסי של הפורום (אם יש /forum/ בנתיב)
-    const pathMatch = window.location.pathname.match(/^(\/[^\/]+)?\/topic\//);
+    // זיהוי הנתיב הבסיסי של הפורום (תומך בכל עומק קינון)
+    const pathMatch = window.location.pathname.match(/^(.*)\/topic\//);
     const basePath = pathMatch && pathMatch[1] ? pathMatch[1] : '';
     const apiBase = `${location.origin}${basePath}/api`;
 

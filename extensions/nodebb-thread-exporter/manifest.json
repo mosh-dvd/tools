@@ -21,7 +21,8 @@
     {
       "matches": [
         "*://*/topic/*",
-        "*://*/forum/topic/*"
+        "*://*/*/topic/*",
+        "*://*/*/*/*/topic/*"
       ],
       "js": [
         "turndown.js",
