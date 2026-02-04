@@ -20,7 +20,8 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*/topic/*"
+        "*://*/topic/*",
+        "*://*/forum/topic/*"
       ],
       "js": [
         "turndown.js",

@@ -50,7 +50,7 @@ async function fetchAndProcessThread() {
 
     // אם לא מצאנו TID ב-ajaxify, ננסה לחלץ אותו מה-URL
     if (!tid) {
-        const match = window.location.pathname.match(/topic\/(\d+)/);
+        const match = window.location.pathname.match(/\/topic\/(\d+)/);
         if (match && match[1]) {
             tid = match[1];
         } else {
@@ -63,9 +63,13 @@ async function fetchAndProcessThread() {
         title = titleElement ? titleElement.textContent.trim() : document.title;
      }
 
+    // זיהוי הנתיב הבסיסי של הפורום (אם יש /forum/ בנתיב)
+    const pathMatch = window.location.pathname.match(/^(\/[^\/]+)?\/topic\//);
+    const basePath = pathMatch && pathMatch[1] ? pathMatch[1] : '';
+    const apiBase = `${location.origin}${basePath}/api`;
 
     // שלב 2: קבלת מידע על מספר העמודים בשרשור
-    const paginationResponse = await fetch(`${location.origin}/api/topic/pagination/${tid}`);
+    const paginationResponse = await fetch(`${apiBase}/topic/pagination/${tid}`);
     if (!paginationResponse.ok) throw new Error(`שגיאה בקבלת מידע על עמודים: ${paginationResponse.statusText}`);
     const paginationData = await paginationResponse.json();
     const pageCount = paginationData.pagination.pageCount;
@@ -74,7 +78,7 @@ async function fetchAndProcessThread() {
     const pagePromises = [];
     for (let i = 1; i <= pageCount; i++) {
         pagePromises.push(
-            fetch(`${location.origin}/api/topic/${tid}?page=${i}`).then(res => {
+            fetch(`${apiBase}/topic/${tid}?page=${i}`).then(res => {
                 if (!res.ok) throw new Error(`שגיאה בטעינת עמוד ${i}`);
                 return res.json();
             })
